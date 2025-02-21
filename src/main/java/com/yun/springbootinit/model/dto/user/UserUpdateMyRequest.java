@@ -2,6 +2,9 @@ package com.yun.springbootinit.model.dto.user;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
 
 /**
@@ -11,22 +14,14 @@ import lombok.Data;
  * 
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class UserUpdateMyRequest implements Serializable {
 
     /**
      * 用户昵称
      */
-    private String userName;
-
-    /**
-     * 用户头像
-     */
-    private String userAvatar;
-
-    /**
-     * 简介
-     */
-    private String userProfile;
+    private String username;
 
     private static final long serialVersionUID = 1L;
 }

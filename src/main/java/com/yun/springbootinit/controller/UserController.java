@@ -2,36 +2,26 @@ package com.yun.springbootinit.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yun.springbootinit.annotation.AuthCheck;
+import com.yun.springbootinit.common.BaseResponse;
 import com.yun.springbootinit.common.DeleteRequest;
+import com.yun.springbootinit.common.ErrorCode;
 import com.yun.springbootinit.common.ResultUtils;
 import com.yun.springbootinit.constant.UserConstant;
 import com.yun.springbootinit.exception.BusinessException;
 import com.yun.springbootinit.exception.ThrowUtils;
-import com.yun.springbootinit.model.dto.user.UserRegisterRequest;
-import com.yun.springbootinit.model.dto.user.UserUpdateMyRequest;
-import com.yun.springbootinit.model.dto.user.UserUpdateRequest;
+import com.yun.springbootinit.model.dto.user.*;
 import com.yun.springbootinit.model.entity.User;
 import com.yun.springbootinit.model.vo.LoginUserVO;
 import com.yun.springbootinit.model.vo.UserVO;
-import com.yun.springbootinit.service.UserService;
-import com.yun.springbootinit.common.BaseResponse;
-import com.yun.springbootinit.common.ErrorCode;
-import com.yun.springbootinit.model.dto.user.UserAddRequest;
-import com.yun.springbootinit.model.dto.user.UserLoginRequest;
-import com.yun.springbootinit.model.dto.user.UserQueryRequest;
-
-import java.util.List;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-
+import com.yun.springbootinit.service.IUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * 用户接口
@@ -45,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     @Resource
-    private UserService userService;
+    private IUserService userService;
 
     // region 登录相关
 
@@ -60,13 +50,13 @@ public class UserController {
         if (userRegisterRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        String userAccount = userRegisterRequest.getUserAccount();
-        String userPassword = userRegisterRequest.getUserPassword();
+        String account = userRegisterRequest.getAccount();
+        String password = userRegisterRequest.getPassword();
         String checkPassword = userRegisterRequest.getCheckPassword();
-        if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
+        if (StringUtils.isAnyBlank(account, password, checkPassword)) {
             return null;
         }
-        long result = userService.userRegister(userAccount, userPassword, checkPassword);
+        long result = userService.userRegister(account, password, checkPassword);
         return ResultUtils.success(result);
     }
 
@@ -82,12 +72,12 @@ public class UserController {
         if (userLoginRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        String userAccount = userLoginRequest.getUserAccount();
-        String userPassword = userLoginRequest.getUserPassword();
-        if (StringUtils.isAnyBlank(userAccount, userPassword)) {
+        String account = userLoginRequest.getAccount();
+        String password = userLoginRequest.getPassword();
+        if (StringUtils.isAnyBlank(account, password)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        LoginUserVO loginUserVO = userService.userLogin(userAccount, userPassword, request);
+        LoginUserVO loginUserVO = userService.userLogin(account, password, request);
         return ResultUtils.success(loginUserVO);
     }
 
@@ -164,13 +154,11 @@ public class UserController {
      * 更新用户
      *
      * @param userUpdateRequest
-     * @param request
      * @return
      */
     @PostMapping("/update")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Boolean> updateUser(@RequestBody UserUpdateRequest userUpdateRequest,
-                                            HttpServletRequest request) {
+    public BaseResponse<Boolean> updateUser(@RequestBody UserUpdateRequest userUpdateRequest) {
         if (userUpdateRequest == null || userUpdateRequest.getId() == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }

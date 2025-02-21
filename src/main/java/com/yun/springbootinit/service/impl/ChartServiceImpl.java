@@ -3,7 +3,7 @@ package com.yun.springbootinit.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yun.springbootinit.mapper.ChartMapper;
 import com.yun.springbootinit.model.entity.Chart;
-import com.yun.springbootinit.service.ChartService;
+import com.yun.springbootinit.service.IChartService;
 import org.springframework.stereotype.Service;
 
 /**
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class ChartServiceImpl extends ServiceImpl<ChartMapper, Chart>
-        implements ChartService {
+        implements IChartService {
 
 }
 

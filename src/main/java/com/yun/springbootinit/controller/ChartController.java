@@ -15,8 +15,8 @@ import com.yun.springbootinit.exception.ThrowUtils;
 import com.yun.springbootinit.model.dto.chart.*;
 import com.yun.springbootinit.model.entity.Chart;
 import com.yun.springbootinit.model.entity.User;
-import com.yun.springbootinit.service.ChartService;
-import com.yun.springbootinit.service.UserService;
+import com.yun.springbootinit.service.IChartService;
+import com.yun.springbootinit.service.IUserService;
 import com.yun.springbootinit.utils.ExcelUtils;
 import com.yun.springbootinit.utils.SqlUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -43,10 +43,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class ChartController {
 
     @Resource
-    private ChartService chartService;
+    private IChartService chartService;
 
     @Resource
-    private UserService userService;
+    private IUserService userService;
 
     @Resource
     private ThreadPoolExecutor threadPoolExecutor;
@@ -407,7 +407,7 @@ public class ChartController {
         // TODO: 2023/7/23 建议处理一下任务队列满了的话，抛异常可以怎么处理
         CompletableFuture.runAsync(() -> {
             // 打印日志
-            log.info("用户名：" + currentUser.getUserName() + "的任务执行中：" + name + "执行线程：" + Thread.currentThread().getName());
+            log.info("用户名：" + currentUser.getUsername() + "的任务执行中：" + name + "执行线程：" + Thread.currentThread().getName());
             // 修改图表状态为执行中
             Chart updateChart = new Chart();
             updateChart.setId(chart.getId());

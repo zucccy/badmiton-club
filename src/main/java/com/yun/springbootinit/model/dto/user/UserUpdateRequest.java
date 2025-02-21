@@ -1,16 +1,20 @@
 package com.yun.springbootinit.model.dto.user;
 
-import java.io.Serializable;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
+
+import java.io.Serializable;
 
 /**
  * 用户更新请求
  *
  * @author chenyun
- * 
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class UserUpdateRequest implements Serializable {
     /**
      * id
@@ -20,22 +24,12 @@ public class UserUpdateRequest implements Serializable {
     /**
      * 用户昵称
      */
-    private String userName;
-
-    /**
-     * 用户头像
-     */
-    private String userAvatar;
-
-    /**
-     * 简介
-     */
-    private String userProfile;
+    private String username;
 
     /**
      * 用户角色：user/admin/ban
      */
-    private String userRole;
+    private String role;
 
     private static final long serialVersionUID = 1L;
 }

@@ -3,12 +3,17 @@ package com.yun.springbootinit.model.vo;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
 
 /**
  * 已登录用户视图（脱敏）
  **/
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class LoginUserVO implements Serializable {
 
     /**
@@ -19,18 +24,12 @@ public class LoginUserVO implements Serializable {
     /**
      * 用户昵称
      */
-    private String userName;
-
-    /**
-     * 用户头像
-     */
-    private String userAvatar;
-
+    private String username;
 
     /**
      * 用户角色：user/admin
      */
-    private String userRole;
+    private String role;
 
     /**
      * 创建时间

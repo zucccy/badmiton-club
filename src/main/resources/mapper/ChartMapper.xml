@@ -24,10 +24,4 @@
         userId,createTime,updateTime,
         isDelete
     </sql>
-    <!--    querychartData唯一标识符；parameterType查询语句的参数类型，类型为字符串；resultType查询结果的返回类型，类型为map类型-->
-    <!--    有SQL注入的风险-->
-    <select id="queryChartData" parameterType="string" resultType="map">
-        ${querySql}
-    </select>
-    <!--    可以在后端程序里面去做校验。只要保证这个SQL是通过你的后端生成的，在生成的过程中做了校验，就不会有这种漏洞的风险。-->
 </mapper>

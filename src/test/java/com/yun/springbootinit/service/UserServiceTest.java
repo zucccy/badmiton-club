@@ -16,18 +16,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 public class UserServiceTest {
 
     @Resource
-    private UserService userService;
+    private IUserService userService;
 
     @Test
     void userRegister() {
-        String userAccount = "yupi";
-        String userPassword = "";
+        String account = "yun";
+        String password = "";
         String checkPassword = "123456";
         try {
-            long result = userService.userRegister(userAccount, userPassword, checkPassword);
+            long result = userService.userRegister(account, password, checkPassword);
             Assertions.assertEquals(-1, result);
-            userAccount = "yu";
-            result = userService.userRegister(userAccount, userPassword, checkPassword);
+            account = "chenyun";
+            result = userService.userRegister(account, password, checkPassword);
             Assertions.assertEquals(-1, result);
         } catch (Exception e) {
 

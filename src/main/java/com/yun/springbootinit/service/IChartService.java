@@ -8,6 +8,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @description 针对表【chart(图表信息表)】的数据库操作Service
  * @createDate 2023-07-18 22:39:07
  */
-public interface ChartService extends IService<Chart> {
+public interface IChartService extends IService<Chart> {
 
 }

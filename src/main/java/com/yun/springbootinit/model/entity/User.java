@@ -1,11 +1,11 @@
 package com.yun.springbootinit.model.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import io.swagger.annotations.ApiModel;
+import lombok.*;
 
 import java.io.Serializable;
 import java.util.Date;
-
-import lombok.Data;
 
 /**
  * 用户
@@ -14,6 +14,11 @@ import lombok.Data;
  */
 @TableName(value = "user")
 @Data
+@EqualsAndHashCode(callSuper = false)
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@ApiModel(value="User对象", description="用户信息表")
 public class User implements Serializable {
     /**
      * id
@@ -24,27 +29,22 @@ public class User implements Serializable {
     /**
      * 账号
      */
-    private String userAccount;
+    private String account;
 
     /**
      * 密码
      */
-    private String userPassword;
+    private String password;
 
     /**
      * 用户昵称
      */
-    private String userName;
-
-    /**
-     * 用户头像
-     */
-    private String userAvatar;
+    private String username;
 
     /**
      * 用户角色：user/admin
      */
-    private String userRole;
+    private String role;
 
     /**
      * 创建时间

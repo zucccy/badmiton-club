@@ -1,5 +1,8 @@
 package com.yun.springbootinit.model.dto.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.yun.springbootinit.common.PageRequest;
 
 import java.io.Serializable;
@@ -15,6 +18,8 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class UserQueryRequest extends PageRequest implements Serializable {
     /**
      * id
@@ -22,29 +27,14 @@ public class UserQueryRequest extends PageRequest implements Serializable {
     private Long id;
 
     /**
-     * 开放平台id
-     */
-    private String unionId;
-
-    /**
-     * 公众号openId
-     */
-    private String mpOpenId;
-
-    /**
      * 用户昵称
      */
-    private String userName;
-
-    /**
-     * 简介
-     */
-    private String userProfile;
+    private String username;
 
     /**
      * 用户角色：user/admin/ban
      */
-    private String userRole;
+    private String role;
 
     private static final long serialVersionUID = 1L;
 }
