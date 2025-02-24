@@ -1,9 +1,11 @@
 package com.yun.springbootinit.controller;
 
 
+import com.yun.springbootinit.service.IMemberService;
 import org.springframework.web.bind.annotation.RequestMapping;
-
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
 
 /**
  * <p>
@@ -16,5 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/member")
 public class MemberController {
+    @Resource
+    private IMemberService memberService;
 
+//    @PostMapping
+//    public
 }

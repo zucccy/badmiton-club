@@ -118,3 +118,10 @@ CREATE TABLE attachment
     reviewed_time TIMESTAMP COMMENT '审核时间',
     upload_time   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '上传时间'
 ) COMMENT='文件附件表';
+
+-- 常用查询字段添加索引
+ALTER TABLE member ADD INDEX idx_current_level (current_level);
+ALTER TABLE member ADD INDEX idx_current_club_id (current_club_id);
+ALTER TABLE club_member_relation ADD INDEX idx_member_id (member_id);
+ALTER TABLE score_record ADD INDEX idx_score (score);
+ALTER TABLE game ADD INDEX idx_dates (start_date, end_date);

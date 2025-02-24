@@ -33,7 +33,7 @@ server:
         max-age: 2592000
 mybatis-plus:
   configuration:
-    map-underscore-to-camel-case: false
+    map-underscore-to-camel-case: true # 下划线转驼峰
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
     db-config:

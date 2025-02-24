@@ -16,11 +16,11 @@ import java.lang.annotation.Target;
 public @interface AuthCheck {
 
     /**
-     * 必须有某个角色
+     * 必须有某个角色，默认需要admin角色
      *
      * @return
      */
-    String mustRole() default "";
+    String mustRole() default "admin";
 
 }
 
