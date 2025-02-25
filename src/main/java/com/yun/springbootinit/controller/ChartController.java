@@ -98,7 +98,7 @@ public class ChartController {
         ThrowUtils.throwIf(oldChart == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可删除
         if (!oldChart.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+            throw new BusinessException(ErrorCode.NO_AUTH_OR_FORBIDDEN_ERROR);
         }
         boolean b = chartService.removeById(id);
         return ResultUtils.success(b);
@@ -228,7 +228,7 @@ public class ChartController {
         ThrowUtils.throwIf(oldChart == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可编辑
         if (!oldChart.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+            throw new BusinessException(ErrorCode.NO_AUTH_OR_FORBIDDEN_ERROR);
         }
         boolean result = chartService.updateById(chart);
         return ResultUtils.success(result);

@@ -85,15 +85,15 @@ public class Member implements Serializable {
 
     @ApiModelProperty(value = "是否公务员，0为否")
     @TableField("is_civil_servant")
-    private Integer isCivilServant;
+    private Boolean isCivilServant;
 
     @ApiModelProperty(value = "是否科局级及以上，0为否")
     @TableField("is_cadre")
-    private Integer isCadre;
+    private Boolean isCadre;
 
     @ApiModelProperty(value = "是否退役军人，0为否")
     @TableField("is_veteran")
-    private Integer isVeteran;
+    private Boolean isVeteran;
 
     @ApiModelProperty(value = "专业运动员等级")
     @TableField("athlete_level")
@@ -109,11 +109,11 @@ public class Member implements Serializable {
 
     @ApiModelProperty(value = "身高(cm)")
     @TableField("height")
-    private BigDecimal height;
+    private Double height;
 
     @ApiModelProperty(value = "体重(kg)")
     @TableField("weight")
-    private BigDecimal weight;
+    private Double weight;
 
     @ApiModelProperty(value = "服装尺寸")
     @TableField("uniform_size")
