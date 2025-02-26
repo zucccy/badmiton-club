@@ -17,7 +17,7 @@ import com.yun.springbootinit.model.entity.Chart;
 import com.yun.springbootinit.model.entity.User;
 import com.yun.springbootinit.service.IChartService;
 import com.yun.springbootinit.service.IUserService;
-import com.yun.springbootinit.utils.ExcelUtils;
+import com.yun.springbootinit.utils.FileUtils;
 import com.yun.springbootinit.utils.SqlUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -268,7 +268,7 @@ public class ChartController {
         ThrowUtils.throwIf(!ValidSuffixList.contains(suffix), ErrorCode.PARAMS_ERROR, "文件后缀非法");
 
         // 将multipartFile转换为csv
-        String fileData = ExcelUtils.excelToCsv(multipartFile);
+        String fileData = null;
         // 校验原始数据
         ThrowUtils.throwIf(StringUtils.isBlank(fileData), ErrorCode.PARAMS_ERROR, "原始数据为空");
 
@@ -374,7 +374,7 @@ public class ChartController {
         ThrowUtils.throwIf(!ValidSuffixList.contains(suffix), ErrorCode.PARAMS_ERROR, "文件后缀非法");
 
         // 将multipartFile转换为csv
-        String fileData = ExcelUtils.excelToCsv(multipartFile);
+        String fileData = null;
         // 校验原始数据
         ThrowUtils.throwIf(StringUtils.isBlank(fileData), ErrorCode.PARAMS_ERROR, "原始数据为空");
 
@@ -484,7 +484,7 @@ public class ChartController {
         ThrowUtils.throwIf(!ValidSuffixList.contains(suffix), ErrorCode.PARAMS_ERROR, "文件后缀非法");
 
         // 将multipartFile转换为csv
-        String fileData = ExcelUtils.excelToCsv(multipartFile);
+        String fileData = null;
         // 校验原始数据
         ThrowUtils.throwIf(StringUtils.isBlank(fileData), ErrorCode.PARAMS_ERROR, "原始数据为空");
         // 将用户提交的信息入库

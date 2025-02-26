@@ -54,6 +54,24 @@ public enum ClubLevelEnum {
         return null;
     }
 
+    /**
+     * 根据 text 获取枚举
+     *
+     * @param text
+     * @return
+     */
+    public static ClubLevelEnum getEnumByText(String text) {
+        if (ObjectUtils.isEmpty(text)) {
+            return null;
+        }
+        for (ClubLevelEnum anEnum : ClubLevelEnum.values()) {
+            if (anEnum.text.equals(text)) {
+                return anEnum;
+            }
+        }
+        return null;
+    }
+
     public Integer getValue() {
         return value;
     }

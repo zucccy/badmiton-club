@@ -15,7 +15,8 @@ public enum ErrorCode {
     NOT_FOUND_ERROR(404, "请求数据不存在"),
     TOO_MANY_REQUEST(429, "请求过于频繁"),
     SYSTEM_ERROR(500, "系统内部异常"),
-    OPERATION_ERROR(501, "操作失败");
+    OPERATION_ERROR(501, "操作失败"),
+    FILE_OPERATE_ERROR(502, "文件操作失败");
 
     /**
      * 状态码

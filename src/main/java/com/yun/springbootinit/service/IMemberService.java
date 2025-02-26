@@ -6,7 +6,9 @@ import com.yun.springbootinit.model.dto.user.UserQueryRequest;
 import com.yun.springbootinit.model.entity.Member;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.yun.springbootinit.model.entity.User;
+import com.yun.springbootinit.model.vo.ImportResultVO;
 import com.yun.springbootinit.model.vo.MemberVO;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -40,4 +42,11 @@ public interface IMemberService extends IService<Member> {
      * @return
      */
     MemberVO getMemberVO(Member member);
+
+    /**
+     * 导入会员excel数据到数据表
+     * @param file
+     * @return
+     */
+    ImportResultVO importMember(MultipartFile file);
 }

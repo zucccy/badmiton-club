@@ -1,31 +1,41 @@
 package com.yun.springbootinit.service.impl;
 
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.ZoneId;
-import java.util.*;
-
 import cn.hutool.core.collection.CollectionUtil;
+import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yun.springbootinit.common.ErrorCode;
 import com.yun.springbootinit.constant.CommonConstant;
 import com.yun.springbootinit.exception.BusinessException;
+import com.yun.springbootinit.listener.MemberImportListener;
+import com.yun.springbootinit.mapper.MemberMapper;
+import com.yun.springbootinit.model.dto.member.MemberImportData;
 import com.yun.springbootinit.model.dto.member.MemberQueryRequest;
 import com.yun.springbootinit.model.entity.Club;
 import com.yun.springbootinit.model.entity.Member;
-import com.yun.springbootinit.mapper.MemberMapper;
 import com.yun.springbootinit.model.enums.*;
+import com.yun.springbootinit.model.vo.ImportResultVO;
 import com.yun.springbootinit.model.vo.MemberVO;
 import com.yun.springbootinit.service.IClubService;
 import com.yun.springbootinit.service.IMemberService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yun.springbootinit.utils.SqlUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -39,8 +49,14 @@ import java.util.stream.Collectors;
 @Service
 public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> implements IMemberService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MemberServiceImpl.class);
+
     @Resource
     private IClubService clubService;
+
+    @Resource
+    @Lazy
+    private MemberImportListener listener;
 
     @Override
     public QueryWrapper<Member> getQueryWrapper(MemberQueryRequest memberQueryRequest) {
@@ -124,6 +140,19 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         return memberVO;
     }
 
+    @Override
+    public ImportResultVO importMember(MultipartFile file) {
+        try {
+            EasyExcel.read(file.getInputStream(), MemberImportData.class, listener)
+                    .sheet()
+                    .doRead();
+            return new ImportResultVO(listener.getProcessedNum(), listener.getErrorInfoList());
+        } catch (IOException e) {
+            LOGGER.error("file read error, file name: {}", file.getOriginalFilename());
+            throw new BusinessException(ErrorCode.FILE_OPERATE_ERROR, "文件读取失败");
+        }
+    }
+
     /**
      * 获取age年前的日期
      *
@@ -155,6 +184,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         LocalDate currentDate = LocalDate.now();
         // 计算当前日期与出生日期之间的差值
         Period period = Period.between(birthDate, currentDate);
-        return period.getYears() + 1;
+        int age = period.getYears() + 1;
+        // 如果生日已过
+        if (currentDate.getMonthValue() > birthDate.getMonthValue()
+                || (currentDate.getMonthValue() == birthDate.getMonthValue()
+                && currentDate.getDayOfMonth() > birthDate.getDayOfMonth())) {
+            age--;
+        }
+        return age;
     }
 }

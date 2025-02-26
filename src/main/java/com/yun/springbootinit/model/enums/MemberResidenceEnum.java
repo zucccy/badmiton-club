@@ -57,6 +57,24 @@ public enum MemberResidenceEnum {
         return null;
     }
 
+    /**
+     * 根据 text 获取枚举
+     *
+     * @param text
+     * @return
+     */
+    public static MemberResidenceEnum getEnumByText(String text) {
+        if (ObjectUtils.isEmpty(text)) {
+            return null;
+        }
+        for (MemberResidenceEnum anEnum : MemberResidenceEnum.values()) {
+            if (anEnum.text.equals(text)) {
+                return anEnum;
+            }
+        }
+        return null;
+    }
+
     public String getValue() {
         return value;
     }

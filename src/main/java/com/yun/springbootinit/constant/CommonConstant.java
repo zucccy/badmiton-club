@@ -23,4 +23,12 @@ public interface CommonConstant {
     String END = "end";
 
     String START = "start";
+
+    String MALE = "男";
+
+    String FEMALE = "女";
+
+    String TRUE = "是";
+
+    String FALSE = "否";
 }

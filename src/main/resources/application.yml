@@ -18,6 +18,8 @@ spring:
     url: jdbc:mysql://127.0.0.1:3306/badminton_club?characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
     username: root
     password: 123456
+    hikari:
+      auto-commit: false # 关闭自动提交
   # 文件上传
   servlet:
     multipart:
@@ -40,3 +42,14 @@ mybatis-plus:
       logic-delete-field: isDelete # 全局逻辑删除的实体字段名
       logic-delete-value: 1 # 逻辑已删除值（默认为 1）
       logic-not-delete-value: 0 # 逻辑未删除值（默认为 0）
+app:
+  default-password: 123456 #用户默认密码
+knife4j:
+  enable: true
+  setting:
+    enable-swagger-models: true
+    enable-document-manage: true
+    enable-open-api: true
+    enable-request-cache: true
+    enable-response-cache: true
+    enable-filter-multipart-apis: true # 禁用 multipart 接口的过滤
