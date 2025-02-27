@@ -27,7 +27,7 @@ public class MemberVO {
 
     private String name;
 
-    // 性别，0为男，1为女
+    // 性别
     private String gender;
 
     // 年龄

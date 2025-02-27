@@ -46,7 +46,7 @@ public class FileUtils {
         if (fileSize > ONE_HUNDRED_MB) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件大小不能超过100MB");
         }
-        if (!Arrays.asList(".xlsx", ".xls").contains(fileSuffix)) {
+        if (!Arrays.asList("xlsx", "xls").contains(fileSuffix)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件类型错误，只支持.xlsx和.xls结尾的文件");
         }
     }

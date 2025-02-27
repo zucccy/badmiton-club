@@ -7,27 +7,26 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yun.springbootinit.common.ErrorCode;
 import com.yun.springbootinit.constant.CommonConstant;
 import com.yun.springbootinit.exception.BusinessException;
-import com.yun.springbootinit.listener.MemberImportListener;
 import com.yun.springbootinit.mapper.MemberMapper;
 import com.yun.springbootinit.model.dto.member.MemberImportData;
 import com.yun.springbootinit.model.dto.member.MemberQueryRequest;
 import com.yun.springbootinit.model.entity.Club;
 import com.yun.springbootinit.model.entity.Member;
 import com.yun.springbootinit.model.enums.*;
-import com.yun.springbootinit.model.vo.ImportResultVO;
+import com.yun.springbootinit.model.vo.MemberExportVO;
 import com.yun.springbootinit.model.vo.MemberVO;
 import com.yun.springbootinit.service.IClubService;
 import com.yun.springbootinit.service.IMemberService;
 import com.yun.springbootinit.utils.SqlUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Period;
@@ -53,10 +52,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     @Resource
     private IClubService clubService;
-
-    @Resource
-    @Lazy
-    private MemberImportListener listener;
 
     @Override
     public QueryWrapper<Member> getQueryWrapper(MemberQueryRequest memberQueryRequest) {
@@ -141,15 +136,103 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     }
 
     @Override
-    public ImportResultVO importMember(MultipartFile file) {
+    public void exportMemberVOList(MemberQueryRequest memberQueryRequest, HttpServletResponse response) {
+        if (memberQueryRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
+        }
+        // 构造条件
+        QueryWrapper<Member> queryWrapper = getQueryWrapper(memberQueryRequest);
+        List<Member> memberList = this.list(queryWrapper);
+        List<MemberVO> memberVOList = listMemberVO(memberList);
+        List<MemberExportVO> memberExportVOList = Collections.emptyList();
+        if (CollectionUtil.isNotEmpty(memberVOList)) {
+            memberExportVOList = memberVOList.stream().map(memberVO -> {
+                MemberExportVO memberExportVO = new MemberExportVO();
+                BeanUtils.copyProperties(memberVO, memberExportVO);
+                if (memberVO.getGender() != null) {
+                    if (GenderEnum.MALE.getText().equals(memberVO.getGender())) {
+                        memberExportVO.setGender(CommonConstant.MALE);
+                    } else {
+                        memberExportVO.setGender(CommonConstant.FEMALE);
+                    }
+                }
+                if (memberVO.getIsCivilServant() != null) {
+                    if (BooleanUtils.isTrue(memberVO.getIsCivilServant())) {
+                        memberExportVO.setIsCivilServant(CommonConstant.TRUE);
+                    } else {
+                        memberExportVO.setIsCivilServant(CommonConstant.FALSE);
+                    }
+                }
+                if (memberVO.getIsCadre() != null) {
+                    if (BooleanUtils.isTrue(memberVO.getIsCadre())) {
+                        memberExportVO.setIsCadre(CommonConstant.TRUE);
+                    } else {
+                        memberExportVO.setIsCadre(CommonConstant.FALSE);
+                    }
+                }
+                if (memberVO.getIsVeteran() != null) {
+                    if (BooleanUtils.isTrue(memberVO.getIsVeteran())) {
+                        memberExportVO.setIsVeteran(CommonConstant.TRUE);
+                    } else {
+                        memberExportVO.setIsVeteran(CommonConstant.FALSE);
+                    }
+                }
+                return memberExportVO;
+            }).collect(Collectors.toList());
+        }
+        export(memberExportVOList, response);
+    }
+
+    @Override
+    public void downloadTemplate(HttpServletResponse response) {
         try {
-            EasyExcel.read(file.getInputStream(), MemberImportData.class, listener)
-                    .sheet()
-                    .doRead();
-            return new ImportResultVO(listener.getProcessedNum(), listener.getErrorInfoList());
+            EasyExcel.write(response.getOutputStream(), MemberImportData.class)
+                    .sheet(MemberImportData.SHEET_NAME)
+                    .doWrite(Collections.singletonList(buildMemberImportData()));
         } catch (IOException e) {
-            LOGGER.error("file read error, file name: {}", file.getOriginalFilename());
-            throw new BusinessException(ErrorCode.FILE_OPERATE_ERROR, "文件读取失败");
+            throw new BusinessException(ErrorCode.FILE_OPERATE_ERROR, "文件写入失败");
+        }
+    }
+
+    private static MemberImportData buildMemberImportData() {
+        return MemberImportData.builder()
+                .name(CommonConstant.templateConstant.TEMPLATE_NAME)
+                .gender(CommonConstant.templateConstant.TEMPLATE_GENDER)
+                .birthDate(CommonConstant.templateConstant.TEMPLATE_BRITH_DATE)
+                .phone(CommonConstant.templateConstant.TEMPLATE_PHONE)
+                .nation(CommonConstant.templateConstant.TEMPLATE_NATION)
+                .originAddress(CommonConstant.templateConstant.TEMPLATE_ORIGIN_ADDRESS)
+                .homeAddress(CommonConstant.templateConstant.TEMPLATE_HOME_ADDRESS)
+                .workUnit(CommonConstant.templateConstant.TEMPLATE_WORK_UNIT)
+                .occupation(CommonConstant.templateConstant.TEMPLATE_OCCUPATION)
+                .politicalParty(CommonConstant.templateConstant.TEMPLATE_POLITICAL_PARTY)
+                .clubDuty(CommonConstant.templateConstant.TEMPLATE_CLUB_DUTY)
+                .isCivilServant(CommonConstant.templateConstant.TEMPLATE_IS_CIVIL_SERVANT)
+                .isCadre(CommonConstant.templateConstant.TEMPLATE_IS_CADRE)
+                .isVeteran(CommonConstant.templateConstant.TEMPLATE_IS_VETERAN)
+                .athleteLevel(CommonConstant.templateConstant.TEMPLATE_ATHLETE_LEVEL)
+                .refereeLevel(CommonConstant.templateConstant.TEMPLATE_REFEREE_LEVEL)
+                .honourInfo(CommonConstant.templateConstant.TEMPLATE_HONOUR_INFO)
+                .height(CommonConstant.templateConstant.TEMPLATE_HEIGHT)
+                .weight(CommonConstant.templateConstant.TEMPLATE_WEIGHT)
+                .uniformSize(CommonConstant.templateConstant.TEMPLATE_UNIFORM_SIZE)
+                .residenceArea(CommonConstant.templateConstant.TEMPLATE_RESIDENCE_AREA)
+                .currentClubName(CommonConstant.templateConstant.TEMPLATE_CURRENT_CLUB_NAME)
+                .currentLevel(CommonConstant.templateConstant.TEMPLATE_CURRENT_LEVEL)
+                .idNumber(CommonConstant.templateConstant.TEMPLATE_ID_NUMBER)
+                .bankAccount(CommonConstant.templateConstant.TEMPLATE_BANK_ACCOUNT)
+                .bankName(CommonConstant.templateConstant.TEMPLATE_BANK_NAME)
+                .bankBranch(CommonConstant.templateConstant.TEMPLATE_BANK_BRANCH)
+                .build();
+    }
+
+    private static void export(List<MemberExportVO> memberExportVOList, HttpServletResponse response) {
+        try {
+            EasyExcel.write(response.getOutputStream(), MemberExportVO.class)
+                    .sheet(MemberExportVO.SHEET_NAME)
+                    .doWrite(memberExportVOList);
+        } catch (IOException e) {
+            throw new BusinessException(ErrorCode.FILE_OPERATE_ERROR, "文件写入失败");
         }
     }
 

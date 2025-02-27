@@ -1,31 +1,27 @@
 package com.yun.springbootinit.controller;
 
 
-import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import com.yun.springbootinit.common.BaseResponse;
 import com.yun.springbootinit.common.ErrorCode;
 import com.yun.springbootinit.common.ResultUtils;
+import com.yun.springbootinit.constant.CommonConstant;
 import com.yun.springbootinit.exception.BusinessException;
 import com.yun.springbootinit.exception.ThrowUtils;
-import com.yun.springbootinit.model.dto.member.MemberImportData;
+import com.yun.springbootinit.manage.MemberImportManage;
 import com.yun.springbootinit.model.dto.member.MemberQueryRequest;
 import com.yun.springbootinit.model.entity.Member;
-import com.yun.springbootinit.model.entity.User;
 import com.yun.springbootinit.model.vo.ImportResultVO;
 import com.yun.springbootinit.model.vo.MemberVO;
-import com.yun.springbootinit.model.vo.UserVO;
 import com.yun.springbootinit.service.IMemberService;
 import com.yun.springbootinit.utils.FileUtils;
-import org.springframework.http.MediaType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -39,8 +35,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/member")
 public class MemberController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MemberController.class);
+
     @Resource
     private IMemberService memberService;
+
+    @Resource
+    private MemberImportManage memberImportManage;
 
     @PostMapping("/list")
     public BaseResponse<Page<MemberVO>> listMember(@RequestBody MemberQueryRequest memberQueryRequest) {
@@ -62,19 +63,24 @@ public class MemberController {
     @PostMapping("/import")
     public BaseResponse<ImportResultVO> importMember(@RequestPart("file") MultipartFile file) {
         FileUtils.validFile(file);
-        return ResultUtils.success(memberService.importMember(file));
+        return ResultUtils.success(memberImportManage.importMember(file));
     }
 
     @GetMapping("/template")
     public void downloadTemplate(HttpServletResponse response) {
+        String filename = "member_import_template.xlsx";
         response.setContentType("application/vnd.ms-excel");
-        response.setHeader("Content-Disposition", "attachment;filename=member_template.xlsx");
-        try {
-            EasyExcel.write(response.getOutputStream(), MemberImportData.class)
-                    .sheet("会员导入模板文件")
-                    .doWrite(Collections.emptyList());
-        } catch (IOException e) {
-            throw new BusinessException(ErrorCode.FILE_OPERATE_ERROR, "文件写入失败");
-        }
+        response.setHeader("Content-Disposition", String.format("attachment;filename=%s", filename));
+        memberService.downloadTemplate(response);
     }
+
+    @PostMapping("/export")
+    public void exportMemberVOList(@RequestBody MemberQueryRequest memberQueryRequest, HttpServletResponse response) {
+        String filename = String.format("member_list_%s%s", System.currentTimeMillis(), CommonConstant.EXCEL_FILE_SUFFIX);
+        LOGGER.info("filename: {}", filename);
+        response.setContentType("application/vnd.ms-excel");
+        response.setHeader("Content-Disposition", String.format("attachment;filename=%s", filename));
+        memberService.exportMemberVOList(memberQueryRequest, response);
+    }
+
 }

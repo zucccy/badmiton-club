@@ -1,15 +1,12 @@
 package com.yun.springbootinit.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.yun.springbootinit.model.dto.member.MemberQueryRequest;
-import com.yun.springbootinit.model.dto.user.UserQueryRequest;
-import com.yun.springbootinit.model.entity.Member;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.yun.springbootinit.model.entity.User;
-import com.yun.springbootinit.model.vo.ImportResultVO;
+import com.yun.springbootinit.model.dto.member.MemberQueryRequest;
+import com.yun.springbootinit.model.entity.Member;
 import com.yun.springbootinit.model.vo.MemberVO;
-import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -44,9 +41,15 @@ public interface IMemberService extends IService<Member> {
     MemberVO getMemberVO(Member member);
 
     /**
-     * 导入会员excel数据到数据表
-     * @param file
-     * @return
+     * 根据筛选条件导出会员excel表
+     * @param memberQueryRequest
+     * @param response
      */
-    ImportResultVO importMember(MultipartFile file);
+    void exportMemberVOList(MemberQueryRequest memberQueryRequest, HttpServletResponse response);
+
+    /**
+     * 下载会员导入模板excel表
+     * @param response
+     */
+    void downloadTemplate(HttpServletResponse response);
 }

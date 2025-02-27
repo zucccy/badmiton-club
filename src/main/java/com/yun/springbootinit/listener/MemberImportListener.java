@@ -1,8 +1,5 @@
 package com.yun.springbootinit.listener;
 
-import java.util.Date;
-import java.time.LocalDateTime;
-
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
@@ -10,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.yun.springbootinit.common.ErrorCode;
 import com.yun.springbootinit.constant.CommonConstant;
 import com.yun.springbootinit.exception.BusinessException;
+import com.yun.springbootinit.manage.ConfigManage;
 import com.yun.springbootinit.model.dto.excel.ErrorInfo;
 import com.yun.springbootinit.model.dto.member.MemberImportData;
 import com.yun.springbootinit.model.entity.Club;
@@ -20,14 +18,11 @@ import com.yun.springbootinit.service.IClubService;
 import com.yun.springbootinit.service.IMemberService;
 import com.yun.springbootinit.service.IUserService;
 import com.yun.springbootinit.utils.ValidatorUtils;
-import org.apache.xmlbeans.impl.validator.ValidatorUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
-import javax.validation.Valid;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -38,8 +33,8 @@ import java.util.Objects;
  * @Date: 2025/2/26 22:36
  * @version: 1.0
  */
-@Component
 public class MemberImportListener extends AnalysisEventListener<MemberImportData> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MemberImportListener.class);
 
     private static final int BATCH_SIZE = 200;
 
@@ -49,17 +44,20 @@ public class MemberImportListener extends AnalysisEventListener<MemberImportData
 
     private int processedNum = 0;
 
-    @Value("${app.default-password}")
-    private String defaultPassword;
+    private final String defaultPassword;
 
-    @Resource
-    private IMemberService memberService;
+    private final IMemberService memberService;
 
-    @Resource
-    private IClubService clubService;
+    private final IClubService clubService;
 
-    @Resource
-    private IUserService userService;
+    private final IUserService userService;
+
+    public MemberImportListener(IMemberService memberService, IClubService clubService, IUserService userService, ConfigManage configManage) {
+        this.memberService = memberService;
+        this.clubService = clubService;
+        this.userService = userService;
+        this.defaultPassword = configManage.getDefaultPassword();
+    }
 
     public String getDefaultPassword() {
         return defaultPassword;
@@ -74,15 +72,15 @@ public class MemberImportListener extends AnalysisEventListener<MemberImportData
                 throw new Exception("手机号已存在");
             }
             Member member = importDataToEntity(memberImportData);
-            cacheList.add(member);
-            processedNum++;
-            if (cacheList.size() >= BATCH_SIZE) {
-                batchSave(cacheList);
-                cacheList.clear();
+            this.cacheList.add(member);
+            this.processedNum++;
+            if (this.cacheList.size() >= BATCH_SIZE) {
+                batchSave(this.cacheList);
+                this.cacheList.clear();
             }
 
         } catch (Exception e) {
-            errorInfoList.add(ErrorInfo.builder()
+            this.errorInfoList.add(ErrorInfo.builder()
                     .rowNum(analysisContext.readRowHolder().getRowIndex() + 1)
                     .message(e.getMessage())
                     .build());
@@ -91,12 +89,21 @@ public class MemberImportListener extends AnalysisEventListener<MemberImportData
 
     @Override
     public void doAfterAllAnalysed(AnalysisContext analysisContext) {
-        if (CollectionUtil.isNotEmpty(cacheList)) {
-            batchSave(cacheList);
+        try {
+            if (CollectionUtil.isNotEmpty(this.cacheList)) {
+                batchSave(this.cacheList);
+            }
+        } catch (Exception e) {
+            this.errorInfoList.add(ErrorInfo.builder()
+                    .rowNum(analysisContext.readRowHolder().getRowIndex() + 1)
+                    .message(e.getMessage())
+                    .build());
+            LOGGER.error("message: {}", e.getMessage());
+        } finally {
+            this.cacheList.clear();
         }
     }
 
-    @Transactional(rollbackFor = Exception.class)
     public void batchSave(List<Member> cacheList) {
         memberService.saveBatch(cacheList);
     }
@@ -108,24 +115,31 @@ public class MemberImportListener extends AnalysisEventListener<MemberImportData
         return memberService.count(queryWrapper) > 0;
     }
 
-    private void handleUserAndClub(MemberImportData memberImportData, Member member) {
-        if (memberImportData.getCurrentClubName() == null) {
-            return;
-        }
-        QueryWrapper<Club> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("club_name", memberImportData.getCurrentClubName());
-        Club club = clubService.getOne(queryWrapper);
-        if (club == null) {
-            // 创建club
-            club = new Club();
-            club.setClubName(memberImportData.getCurrentClubName());
-            boolean saveResult = clubService.save(club);
-            if (!saveResult) {
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "俱乐部插入失败，数据库错误");
+    private void handleUserAndClub(MemberImportData memberImportData, Member member) throws Exception{
+        if (memberImportData.getCurrentClubName() != null) {
+            QueryWrapper<Club> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("club_name", memberImportData.getCurrentClubName());
+            Club club = clubService.getOne(queryWrapper);
+            if (club == null) {
+                // 创建club
+                club = new Club();
+                club.setClubName(memberImportData.getCurrentClubName());
+                boolean saveResult = clubService.save(club);
+                if (!saveResult) {
+                    throw new BusinessException(ErrorCode.SYSTEM_ERROR, "俱乐部插入失败，数据库错误");
+                }
             }
+            member.setCurrentClubId(club.getId());
         }
-        member.setCurrentClubId(club.getId());
-        Long userId = userService.userRegister(memberImportData.getPhone(), getDefaultPassword(), getDefaultPassword());
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("account", memberImportData.getPhone());
+        User user = userService.getOne(queryWrapper);
+        Long userId;
+        if (user == null) {
+            userId = userService.userRegister(memberImportData.getPhone(), getDefaultPassword(), getDefaultPassword());
+        } else {
+            userId = user.getId();
+        }
         member.setUserId(userId);
     }
 
@@ -197,6 +211,8 @@ public class MemberImportListener extends AnalysisEventListener<MemberImportData
     private Member importDataToEntity(MemberImportData memberImportData) throws Exception {
         Member member = new Member();
         BeanUtils.copyProperties(memberImportData, member);
+        // 处理出生日期
+        member.setBirthDate(LocalDate.parse(memberImportData.getBirthDate()));
         handleUserAndClub(memberImportData, member);
         handleEnum(memberImportData, member);
         return member;
