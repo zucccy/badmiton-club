@@ -17,6 +17,7 @@ import com.yun.springbootinit.service.IUserService;
 import com.yun.springbootinit.utils.SqlUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ import org.springframework.util.DigestUtils;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -65,6 +67,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             User user = new User();
             user.setAccount(account);
             user.setPassword(encryptPassword);
+            user.setUsername(String.format(UserConstant.DEFAULT_USERNAME + "%s", UUID.randomUUID().toString().substring(0, 6)));
             boolean saveResult = this.save(user);
             if (!saveResult) {
                 throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注册失败，数据库错误");

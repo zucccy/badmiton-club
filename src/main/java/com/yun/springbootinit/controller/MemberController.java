@@ -15,6 +15,7 @@ import com.yun.springbootinit.model.vo.ImportResultVO;
 import com.yun.springbootinit.model.vo.MemberVO;
 import com.yun.springbootinit.service.IMemberService;
 import com.yun.springbootinit.utils.FileUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -43,13 +44,41 @@ public class MemberController {
     @Resource
     private MemberImportManage memberImportManage;
 
-    @PostMapping("/list")
-    public BaseResponse<Page<MemberVO>> listMember(@RequestBody MemberQueryRequest memberQueryRequest) {
-        if (memberQueryRequest == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        long pageSize = memberQueryRequest.getPageSize();
-        long current = memberQueryRequest.getCurrent();
+    @GetMapping("/list")
+    public BaseResponse<Page<MemberVO>> listMember(@RequestParam(required = false) Long id,
+                                                   @RequestParam(required = false) String name,
+                                                   @RequestParam(required = false) String gender,
+                                                   @RequestParam(required = false) Integer startAge,
+                                                   @RequestParam(required = false) Integer endAge,
+                                                   @RequestParam(required = false) Boolean isCivilServant,
+                                                   @RequestParam(required = false) Boolean isCadre,
+                                                   @RequestParam(required = false) Boolean isVeteran,
+                                                   @RequestParam(required = false) String athleteLevel,
+                                                   @RequestParam(required = false) String refereeLevel,
+                                                   @RequestParam(required = false) String residenceArea,
+                                                   @RequestParam(required = false) Long currentClubId,
+                                                   @RequestParam(required = false) Integer currentLevel,
+                                                   @RequestParam(defaultValue = "1") Long current,
+                                                   @RequestParam(defaultValue = "10") Long pageSize,
+                                                   @RequestParam(required = false) String sortField,
+                                                   @RequestParam(required = false, defaultValue = CommonConstant.SORT_ORDER_ASC) String sortOrder
+                                                   ) {
+        MemberQueryRequest memberQueryRequest = new MemberQueryRequest();
+        memberQueryRequest.setId(id);
+        memberQueryRequest.setName(name);
+        memberQueryRequest.setGender(gender);
+        memberQueryRequest.setStartAge(startAge);
+        memberQueryRequest.setEndAge(endAge);
+        memberQueryRequest.setIsCivilServant(isCivilServant);
+        memberQueryRequest.setIsCadre(isCadre);
+        memberQueryRequest.setIsVeteran(isVeteran);
+        memberQueryRequest.setAthleteLevel(athleteLevel);
+        memberQueryRequest.setRefereeLevel(refereeLevel);
+        memberQueryRequest.setResidenceArea(residenceArea);
+        memberQueryRequest.setCurrentClubId(currentClubId);
+        memberQueryRequest.setCurrentLevel(currentLevel);
+        memberQueryRequest.setSortField(sortField);
+        memberQueryRequest.setSortOrder(sortOrder);
         // 限制爬虫
         ThrowUtils.throwIf(pageSize > 50, ErrorCode.PARAMS_ERROR);
         Page<Member> memberPage = memberService.page(new Page<>(current, pageSize),

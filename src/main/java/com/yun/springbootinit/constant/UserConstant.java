@@ -29,4 +29,9 @@ public interface UserConstant {
      * 被封号
      */
     String BAN_ROLE = "ban";
+
+    /**
+     * 默认用户昵称
+     */
+    String DEFAULT_USERNAME = "default_";
 }
