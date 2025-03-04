@@ -112,7 +112,12 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     public MemberVO getMemberVO(Member member) {
         MemberVO memberVO = new MemberVO();
         BeanUtils.copyProperties(member, memberVO);
-        memberVO.setGender(Objects.requireNonNull(GenderEnum.getEnumByValue(member.getGender())).getText());
+        if (Objects.requireNonNull(GenderEnum.getEnumByValue(member.getGender())).getText().equals(GenderEnum.MALE.getText())) {
+            memberVO.setGender(CommonConstant.MALE);
+        } else {
+            memberVO.setGender(CommonConstant.FEMALE);
+        }
+
         memberVO.setAge(getAgeFromBrithDate(member.getBirthDate()));
         if (member.getAthleteLevel() != null && MemberAthleteLevelEnum.getEnumByValue(member.getAthleteLevel()) != null) {
             memberVO.setAthleteLevel(Objects.requireNonNull(MemberAthleteLevelEnum.getEnumByValue(member.getAthleteLevel())).getText());

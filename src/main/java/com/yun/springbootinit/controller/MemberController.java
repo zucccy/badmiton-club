@@ -1,7 +1,10 @@
 package com.yun.springbootinit.controller;
 
 
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.yun.springbootinit.annotation.AuthCheck;
 import com.yun.springbootinit.common.BaseResponse;
 import com.yun.springbootinit.common.ErrorCode;
 import com.yun.springbootinit.common.ResultUtils;
@@ -24,6 +27,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * <p>
@@ -48,21 +53,20 @@ public class MemberController {
     public BaseResponse<Page<MemberVO>> listMember(@RequestParam(required = false) Long id,
                                                    @RequestParam(required = false) String name,
                                                    @RequestParam(required = false) String gender,
-                                                   @RequestParam(required = false) Integer startAge,
-                                                   @RequestParam(required = false) Integer endAge,
-                                                   @RequestParam(required = false) Boolean isCivilServant,
-                                                   @RequestParam(required = false) Boolean isCadre,
-                                                   @RequestParam(required = false) Boolean isVeteran,
-                                                   @RequestParam(required = false) String athleteLevel,
-                                                   @RequestParam(required = false) String refereeLevel,
-                                                   @RequestParam(required = false) String residenceArea,
-                                                   @RequestParam(required = false) Long currentClubId,
-                                                   @RequestParam(required = false) Integer currentLevel,
+                                                   @RequestParam(name = "start_age", required = false) Integer startAge,
+                                                   @RequestParam(name = "end_age", required = false) Integer endAge,
+                                                   @RequestParam(name = "is_civil_servant",required = false) Boolean isCivilServant,
+                                                   @RequestParam(name = "is_cadre", required = false) Boolean isCadre,
+                                                   @RequestParam(name = "is_veteran",required = false) Boolean isVeteran,
+                                                   @RequestParam(name = "athlete_level",required = false) String athleteLevel,
+                                                   @RequestParam(name = "referee_level",required = false) String refereeLevel,
+                                                   @RequestParam(name = "residence_area",required = false) String residenceArea,
+                                                   @RequestParam(name = "current_club_id",required = false) Long currentClubId,
+                                                   @RequestParam(name = "current_level",required = false) Integer currentLevel,
                                                    @RequestParam(defaultValue = "1") Long current,
                                                    @RequestParam(defaultValue = "10") Long pageSize,
-                                                   @RequestParam(required = false) String sortField,
-                                                   @RequestParam(required = false, defaultValue = CommonConstant.SORT_ORDER_ASC) String sortOrder
-                                                   ) {
+                                                   @RequestParam(required = false) String sort
+    ) {
         MemberQueryRequest memberQueryRequest = new MemberQueryRequest();
         memberQueryRequest.setId(id);
         memberQueryRequest.setName(name);
@@ -77,8 +81,17 @@ public class MemberController {
         memberQueryRequest.setResidenceArea(residenceArea);
         memberQueryRequest.setCurrentClubId(currentClubId);
         memberQueryRequest.setCurrentLevel(currentLevel);
-        memberQueryRequest.setSortField(sortField);
-        memberQueryRequest.setSortOrder(sortOrder);
+        JSONObject sortJsonObj = JSONUtil.parseObj(sort);
+        if (sortJsonObj.size() == 1) {
+            Set<Map.Entry<String, Object>> entries = sortJsonObj.entrySet();
+            entries.forEach(entry -> {
+                memberQueryRequest.setSortField(entry.getKey());
+                if (CommonConstant.AGE.equals(entry.getKey())) {
+                    memberQueryRequest.setSortField(CommonConstant.BRITH_DATE);
+                }
+                memberQueryRequest.setSortOrder(entry.getValue() == null ? CommonConstant.SORT_ORDER_ASC : (String) entry.getValue());
+            });
+        }
         // 限制爬虫
         ThrowUtils.throwIf(pageSize > 50, ErrorCode.PARAMS_ERROR);
         Page<Member> memberPage = memberService.page(new Page<>(current, pageSize),
@@ -89,6 +102,7 @@ public class MemberController {
         return ResultUtils.success(memberVOPage);
     }
 
+    @AuthCheck
     @PostMapping("/import")
     public BaseResponse<ImportResultVO> importMember(@RequestPart("file") MultipartFile file) {
         FileUtils.validFile(file);

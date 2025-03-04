@@ -46,6 +46,10 @@ public interface CommonConstant {
 
     String EXCEL_FILE_SUFFIX = ".xlsx";
 
+    String AGE = "age";
+
+    String BRITH_DATE = "birth_date";
+
     interface templateConstant {
 
         String TEMPLATE_NAME = "陈阿三";
