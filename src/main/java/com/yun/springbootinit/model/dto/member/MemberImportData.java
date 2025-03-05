@@ -80,12 +80,12 @@ public class MemberImportData {
     @ExcelProperty(value = "荣誉信息")
     private String honourInfo;
 
-    @ExcelProperty(value = "身高(cm)")
+    @ExcelProperty(value = "身高（cm）")
     @Max(value = 250, message = "身高不能高于250cm")
     @Min(value = 40, message = "身高不能低于40cm")
     private Double height;
 
-    @ExcelProperty(value = "体重(kg)")
+    @ExcelProperty(value = "体重（kg）")
     @Max(value = 500, message = "体重不能高于500kg")
     @Min(value = 0, message = "体重不能低于0kg")
     private Double weight;

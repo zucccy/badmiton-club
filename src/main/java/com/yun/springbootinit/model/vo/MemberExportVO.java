@@ -70,10 +70,10 @@ public class MemberExportVO {
     @ExcelProperty(value = "荣誉信息")
     private String honourInfo;
 
-    @ExcelProperty(value = "身高(cm)")
+    @ExcelProperty(value = "身高（cm）")
     private Double height;
 
-    @ExcelProperty(value = "体重(kg)")
+    @ExcelProperty(value = "体重（kg）")
     private Double weight;
 
     @ExcelProperty(value = "服装尺寸")

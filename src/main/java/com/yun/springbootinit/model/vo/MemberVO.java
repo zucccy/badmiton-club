@@ -1,15 +1,10 @@
 package com.yun.springbootinit.model.vo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -58,13 +53,13 @@ public class MemberVO {
     private String clubDuty;
 
     // 是否公务员，0为否
-    private Boolean isCivilServant;
+    private String isCivilServant;
 
     // 是否科局级及以上，0为否
-    private Boolean isCadre;
+    private String isCadre;
 
     // 是否退役军人，0为否
-    private Boolean isVeteran;
+    private String isVeteran;
 
     // 专业运动员等级
     private String athleteLevel;
@@ -86,6 +81,9 @@ public class MemberVO {
 
     // 人员归属地（分龙港、苍南、平阳、温州市内、浙江省内、省外6个选项）
     private String residenceArea;
+
+    // 当前所属俱乐部id
+    private Long currentClubId;
 
     // 当前所属俱乐部名
     private String currentClubName;

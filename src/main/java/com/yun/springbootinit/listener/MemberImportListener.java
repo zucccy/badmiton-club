@@ -42,8 +42,6 @@ public class MemberImportListener extends AnalysisEventListener<MemberImportData
 
     private final List<ErrorInfo> errorInfoList = new ArrayList<>();
 
-    private int processedNum = 0;
-
     private final String defaultPassword;
 
     private final IMemberService memberService;
@@ -73,7 +71,6 @@ public class MemberImportListener extends AnalysisEventListener<MemberImportData
             }
             Member member = importDataToEntity(memberImportData);
             this.cacheList.add(member);
-            this.processedNum++;
             if (this.cacheList.size() >= BATCH_SIZE) {
                 batchSave(this.cacheList);
                 this.cacheList.clear();
@@ -220,9 +217,5 @@ public class MemberImportListener extends AnalysisEventListener<MemberImportData
 
     public List<ErrorInfo> getErrorInfoList() {
         return this.errorInfoList;
-    }
-
-    public int getProcessedNum() {
-        return this.processedNum;
     }
 }

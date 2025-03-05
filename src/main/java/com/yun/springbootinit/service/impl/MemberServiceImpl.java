@@ -117,7 +117,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         } else {
             memberVO.setGender(CommonConstant.FEMALE);
         }
-
+        memberVO.setIsCivilServant(BooleanUtils.isTrue(member.getIsCivilServant()) ? CommonConstant.TRUE : CommonConstant.FALSE);
+        memberVO.setIsCadre(BooleanUtils.isTrue(member.getIsCadre()) ? CommonConstant.TRUE : CommonConstant.FALSE);
+        memberVO.setIsVeteran(BooleanUtils.isTrue(member.getIsVeteran()) ? CommonConstant.TRUE : CommonConstant.FALSE);
         memberVO.setAge(getAgeFromBrithDate(member.getBirthDate()));
         if (member.getAthleteLevel() != null && MemberAthleteLevelEnum.getEnumByValue(member.getAthleteLevel()) != null) {
             memberVO.setAthleteLevel(Objects.requireNonNull(MemberAthleteLevelEnum.getEnumByValue(member.getAthleteLevel())).getText());
@@ -159,27 +161,6 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
                         memberExportVO.setGender(CommonConstant.MALE);
                     } else {
                         memberExportVO.setGender(CommonConstant.FEMALE);
-                    }
-                }
-                if (memberVO.getIsCivilServant() != null) {
-                    if (BooleanUtils.isTrue(memberVO.getIsCivilServant())) {
-                        memberExportVO.setIsCivilServant(CommonConstant.TRUE);
-                    } else {
-                        memberExportVO.setIsCivilServant(CommonConstant.FALSE);
-                    }
-                }
-                if (memberVO.getIsCadre() != null) {
-                    if (BooleanUtils.isTrue(memberVO.getIsCadre())) {
-                        memberExportVO.setIsCadre(CommonConstant.TRUE);
-                    } else {
-                        memberExportVO.setIsCadre(CommonConstant.FALSE);
-                    }
-                }
-                if (memberVO.getIsVeteran() != null) {
-                    if (BooleanUtils.isTrue(memberVO.getIsVeteran())) {
-                        memberExportVO.setIsVeteran(CommonConstant.TRUE);
-                    } else {
-                        memberExportVO.setIsVeteran(CommonConstant.FALSE);
                     }
                 }
                 return memberExportVO;

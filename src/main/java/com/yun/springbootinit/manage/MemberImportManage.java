@@ -46,7 +46,7 @@ public class MemberImportManage {
             EasyExcel.read(file.getInputStream(), MemberImportData.class, listener)
                     .sheet()
                     .doRead();
-            return new ImportResultVO(listener.getProcessedNum(), listener.getErrorInfoList());
+            return new ImportResultVO(listener.getErrorInfoList());
         } catch (IOException e) {
             LOGGER.error("file read error, file name: {}", file.getOriginalFilename());
             throw new BusinessException(ErrorCode.FILE_OPERATE_ERROR, "文件读取失败");

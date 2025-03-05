@@ -15,7 +15,5 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class ImportResultVO {
-    private Integer processNum;
-
     private List<ErrorInfo> errorInfoList;
 }
