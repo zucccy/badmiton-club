@@ -115,6 +115,7 @@ public class MemberController {
         memberService.downloadTemplate(response);
     }
 
+    @AuthCheck
     @PostMapping("/export")
     public void exportMemberVOList(@RequestBody MemberQueryRequest memberQueryRequest, HttpServletResponse response) {
         String filename = String.format("member_list_%s%s", System.currentTimeMillis(), CommonConstant.EXCEL_FILE_SUFFIX);
