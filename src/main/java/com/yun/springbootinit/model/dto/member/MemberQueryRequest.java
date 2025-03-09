@@ -45,8 +45,8 @@ public class MemberQueryRequest extends PageRequest implements Serializable {
     // 人员归属地（分龙港、苍南、平阳、温州市内、浙江省内、省外6个选项）
     private String residenceArea;
 
-    // 当前所属俱乐部id
-    private Long currentClubId;
+    // 当前所属俱乐部名称
+    private String currentClubName;
 
     // 当前组别，0表示丙，1表示乙，2表示甲
     private Integer currentLevel;

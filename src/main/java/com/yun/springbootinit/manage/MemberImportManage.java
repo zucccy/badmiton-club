@@ -9,6 +9,7 @@ import com.yun.springbootinit.model.vo.ImportResultVO;
 import com.yun.springbootinit.service.IClubService;
 import com.yun.springbootinit.service.IMemberService;
 import com.yun.springbootinit.service.IUserService;
+import com.yun.springbootinit.service.impl.MemberServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -27,21 +28,13 @@ import java.io.IOException;
 @Component
 public class MemberImportManage {
     private static final Logger LOGGER = LoggerFactory.getLogger(MemberImportManage.class);
-    @Resource
-    private IClubService clubService;
 
     @Resource
-    private IUserService userService;
-
-    @Resource
-    private IMemberService memberService;
-
-    @Resource
-    private ConfigManage configManage;
+    private MemberServiceImpl memberService;
 
     @Transactional(rollbackFor = Exception.class)
     public ImportResultVO importMember(MultipartFile file) {
-        MemberImportListener listener = new MemberImportListener(memberService, clubService, userService, configManage);
+        MemberImportListener listener = new MemberImportListener(memberService);
         try {
             EasyExcel.read(file.getInputStream(), MemberImportData.class, listener)
                     .sheet()

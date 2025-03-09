@@ -8,22 +8,28 @@ import com.yun.springbootinit.common.ErrorCode;
 import com.yun.springbootinit.constant.CommonConstant;
 import com.yun.springbootinit.exception.BusinessException;
 import com.yun.springbootinit.mapper.MemberMapper;
+import com.yun.springbootinit.model.dto.DeleteDTO;
 import com.yun.springbootinit.model.dto.member.MemberImportData;
 import com.yun.springbootinit.model.dto.member.MemberQueryRequest;
 import com.yun.springbootinit.model.entity.Club;
 import com.yun.springbootinit.model.entity.Member;
+import com.yun.springbootinit.model.entity.User;
 import com.yun.springbootinit.model.enums.*;
 import com.yun.springbootinit.model.vo.MemberExportVO;
 import com.yun.springbootinit.model.vo.MemberVO;
 import com.yun.springbootinit.service.IClubService;
 import com.yun.springbootinit.service.IMemberService;
+import com.yun.springbootinit.service.IUserService;
 import com.yun.springbootinit.utils.SqlUtils;
+import com.yun.springbootinit.utils.ValidatorUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
@@ -50,8 +56,14 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MemberServiceImpl.class);
 
+    @Value("${app.default-password}")
+    private String defaultPassword;
+
     @Resource
     private IClubService clubService;
+
+    @Resource
+    private IUserService userService;
 
     @Override
     public QueryWrapper<Member> getQueryWrapper(MemberQueryRequest memberQueryRequest) {
@@ -76,7 +88,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         String athleteLevel = memberQueryRequest.getAthleteLevel();
         String refereeLevel = memberQueryRequest.getRefereeLevel();
         String residenceArea = memberQueryRequest.getResidenceArea();
-        Long currentClubId = memberQueryRequest.getCurrentClubId();
+        String currentClubName = memberQueryRequest.getCurrentClubName();
         Integer currentLevel = memberQueryRequest.getCurrentLevel();
         String sortField = memberQueryRequest.getSortField();
         String sortOrder = memberQueryRequest.getSortOrder();
@@ -94,7 +106,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         queryWrapper.eq(athleteLevel != null, "athlete_level", athleteLevel);
         queryWrapper.eq(refereeLevel != null, "referee_level", refereeLevel);
         queryWrapper.eq(residenceArea != null, "residence_area", residenceArea);
-        queryWrapper.eq(currentClubId != null, "current_club_id", currentClubId);
+        queryWrapper.like(StringUtils.isNotBlank(currentClubName), "current_club_name", currentClubName);
         queryWrapper.eq(currentLevel != null, "current_level", currentLevel);
         queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC), sortField);
         return queryWrapper;
@@ -178,6 +190,160 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         } catch (IOException e) {
             throw new BusinessException(ErrorCode.FILE_OPERATE_ERROR, "文件写入失败");
         }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Long addMember(MemberImportData memberImportData) {
+        if (memberImportData == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
+        }
+        // 字段校验
+        ValidatorUtils.validate(memberImportData);
+        if (checkPhoneExisted(memberImportData)) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "手机号已存在");
+        }
+        Member member = importDataToEntity(memberImportData);
+        this.save(member);
+        return member.getId();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public Integer deleteMember(DeleteDTO memberDeleteDTO) {
+        if (CollectionUtil.isEmpty(memberDeleteDTO.getIdList())) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数错误");
+        }
+        List<Member> memberList = this.listByIds(memberDeleteDTO.getIdList());
+        if (memberList.size() != memberDeleteDTO.getIdList().size()) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "内部服务错误");
+        }
+        this.removeBatchByIds(memberDeleteDTO.getIdList());
+        List<Long> userIdList = memberList.stream().map(Member::getUserId).collect(Collectors.toList());
+        userService.removeBatchByIds(userIdList);
+        return memberDeleteDTO.getIdList().size();
+    }
+
+    public boolean checkPhoneExisted(MemberImportData memberImportData) {
+        // 手机号唯一性校验
+        QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("phone", memberImportData.getPhone());
+        return this.count(queryWrapper) > 0;
+    }
+
+    public void handleUserAndClub(MemberImportData memberImportData, Member member) {
+        if (memberImportData.getCurrentClubName() != null) {
+            QueryWrapper<Club> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("club_name", memberImportData.getCurrentClubName());
+            Club club = clubService.getOne(queryWrapper);
+            if (club == null) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "俱乐部不存在，请先添加俱乐部或选择已存在的俱乐部");
+            }
+            member.setCurrentClubId(club.getId());
+        }
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("account", memberImportData.getPhone());
+        User user = userService.getOne(queryWrapper);
+        Long userId;
+        if (user == null) {
+            userId = userService.userRegister(memberImportData.getPhone(), defaultPassword, defaultPassword);
+        } else {
+            userId = user.getId();
+        }
+        member.setUserId(userId);
+    }
+
+    public void handleEnum(MemberImportData memberImportData, Member member) {
+        if (StringUtils.isBlank(memberImportData.getIsCivilServant())) {
+            member.setIsCivilServant(Boolean.FALSE);
+        } else {
+            if (CommonConstant.TRUE.equals(memberImportData.getIsCivilServant())) {
+                member.setIsCivilServant(Boolean.TRUE);
+            } else if (CommonConstant.FALSE.equals(memberImportData.getIsCivilServant())) {
+                member.setIsCivilServant(Boolean.FALSE);
+            } else {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "是否公务员只能为是/否");
+            }
+        }
+        if (StringUtils.isBlank(memberImportData.getIsCadre())) {
+            member.setIsCadre(Boolean.FALSE);
+        } else {
+            if (CommonConstant.TRUE.equals(memberImportData.getIsCadre())) {
+                member.setIsCadre(Boolean.TRUE);
+            } else if (CommonConstant.FALSE.equals(memberImportData.getIsCadre())) {
+                member.setIsCadre(Boolean.FALSE);
+            } else {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "是否科局级及以上只能为是/否");
+            }
+        }
+        if (StringUtils.isBlank(memberImportData.getIsVeteran())) {
+            member.setIsVeteran(Boolean.FALSE);
+        } else {
+            if (CommonConstant.TRUE.equals(memberImportData.getIsVeteran())) {
+                member.setIsVeteran(Boolean.TRUE);
+            } else if (CommonConstant.FALSE.equals(memberImportData.getIsVeteran())) {
+                member.setIsVeteran(Boolean.FALSE);
+            } else {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "是否退役军人只能为是/否");
+            }
+        }
+        if (StringUtils.isBlank(memberImportData.getGender())) {
+            member.setGender(GenderEnum.MALE.getValue());
+        } else {
+            if (memberImportData.getGender().equals(CommonConstant.MALE)) {
+                member.setGender(GenderEnum.MALE.getValue());
+            } else if (memberImportData.getGender().equals(CommonConstant.FEMALE)) {
+                member.setGender(GenderEnum.FEMALE.getValue());
+            } else {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "性别只能为男/女");
+            }
+        }
+        if (StringUtils.isNotBlank(memberImportData.getAthleteLevel())) {
+            if (MemberAthleteLevelEnum.getEnumByText(memberImportData.getAthleteLevel()) == null) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "专业运动员等级只能为国家级/省级/市级/县级");
+            } else {
+                member.setAthleteLevel(Objects.requireNonNull(MemberAthleteLevelEnum.getEnumByText(memberImportData.getAthleteLevel())).getValue());
+            }
+        }
+        if (StringUtils.isNotBlank(memberImportData.getRefereeLevel())) {
+            if (MemberRefereeLevelEnum.getEnumByText(memberImportData.getRefereeLevel()) == null) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "裁判员等级只能为国家级/一级/二级/三级");
+            } else {
+                member.setRefereeLevel(Objects.requireNonNull(MemberRefereeLevelEnum.getEnumByText(memberImportData.getRefereeLevel())).getValue());
+            }
+        }
+        if (StringUtils.isBlank(memberImportData.getResidenceArea())) {
+            member.setResidenceArea(MemberResidenceEnum.LONGGANG.getValue());
+        } else {
+            if (MemberResidenceEnum.getEnumByText(memberImportData.getResidenceArea()) == null) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "人员归属地只能为龙港/苍南/平阳/温州市内/浙江省内/浙江省外");
+            } else {
+                member.setResidenceArea(Objects.requireNonNull(MemberResidenceEnum.getEnumByText(memberImportData.getResidenceArea())).getValue());
+            }
+        }
+        if (StringUtils.isBlank(memberImportData.getCurrentLevel())) {
+            member.setCurrentLevel(ClubLevelEnum.C_LEVEL.getValue());
+        } else {
+            if (ClubLevelEnum.getEnumByText(memberImportData.getCurrentLevel()) == null) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "当前组别只能为甲组/乙组/丙组");
+            } else {
+                member.setCurrentLevel(Objects.requireNonNull(ClubLevelEnum.getEnumByText(memberImportData.getCurrentLevel())).getValue());
+            }
+        }
+    }
+
+    public Member importDataToEntity(MemberImportData memberImportData) {
+        Member member = new Member();
+        BeanUtils.copyProperties(memberImportData, member);
+        // 处理出生日期
+        member.setBirthDate(LocalDate.parse(memberImportData.getBirthDate()));
+        handleUserAndClub(memberImportData, member);
+        handleEnum(memberImportData, member);
+        return member;
+    }
+
+    public void batchSave(List<Member> memberList) {
+        this.batchSave(memberList);
     }
 
     private static MemberImportData buildMemberImportData() {

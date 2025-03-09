@@ -2,6 +2,8 @@ package com.yun.springbootinit.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.yun.springbootinit.model.dto.DeleteDTO;
+import com.yun.springbootinit.model.dto.member.MemberImportData;
 import com.yun.springbootinit.model.dto.member.MemberQueryRequest;
 import com.yun.springbootinit.model.entity.Member;
 import com.yun.springbootinit.model.vo.MemberVO;
@@ -52,4 +54,17 @@ public interface IMemberService extends IService<Member> {
      * @param response
      */
     void downloadTemplate(HttpServletResponse response);
+
+    /**
+     * 新增会员
+     * @param memberImportData
+     * @return
+     */
+    Long addMember(MemberImportData memberImportData);
+
+    /**
+     * 批量删除会员
+     * @return
+     */
+    Integer deleteMember(DeleteDTO memberDeleteDTO);
 }

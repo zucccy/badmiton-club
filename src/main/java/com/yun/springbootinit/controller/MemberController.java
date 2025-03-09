@@ -11,6 +11,8 @@ import com.yun.springbootinit.common.ResultUtils;
 import com.yun.springbootinit.constant.CommonConstant;
 import com.yun.springbootinit.exception.ThrowUtils;
 import com.yun.springbootinit.manage.MemberImportManage;
+import com.yun.springbootinit.model.dto.DeleteDTO;
+import com.yun.springbootinit.model.dto.member.MemberImportData;
 import com.yun.springbootinit.model.dto.member.MemberQueryRequest;
 import com.yun.springbootinit.model.entity.Member;
 import com.yun.springbootinit.model.vo.ImportResultVO;
@@ -59,7 +61,7 @@ public class MemberController {
                                                    @RequestParam(name = "athlete_level",required = false) String athleteLevel,
                                                    @RequestParam(name = "referee_level",required = false) String refereeLevel,
                                                    @RequestParam(name = "residence_area",required = false) String residenceArea,
-                                                   @RequestParam(name = "current_club_id",required = false) Long currentClubId,
+                                                   @RequestParam(name = "current_club_name",required = false) String currentClubNmae,
                                                    @RequestParam(name = "current_level",required = false) Integer currentLevel,
                                                    @RequestParam(defaultValue = "1") Long current,
                                                    @RequestParam(defaultValue = "10") Long pageSize,
@@ -77,7 +79,7 @@ public class MemberController {
         memberQueryRequest.setAthleteLevel(athleteLevel);
         memberQueryRequest.setRefereeLevel(refereeLevel);
         memberQueryRequest.setResidenceArea(residenceArea);
-        memberQueryRequest.setCurrentClubId(currentClubId);
+        memberQueryRequest.setCurrentClubName(currentClubNmae);
         memberQueryRequest.setCurrentLevel(currentLevel);
         JSONObject sortJsonObj = JSONUtil.parseObj(sort);
         if (sortJsonObj.size() == 1) {
@@ -123,6 +125,16 @@ public class MemberController {
         response.setContentType("application/vnd.ms-excel");
         response.setHeader("Content-Disposition", String.format("attachment;filename=%s", filename));
         memberService.exportMemberVOList(memberQueryRequest, response);
+    }
+
+    @PostMapping("/add")
+    public BaseResponse<Long> addMember(@RequestBody MemberImportData memberImportData) {
+        return ResultUtils.success(memberService.addMember(memberImportData));
+    }
+
+    @DeleteMapping("/delete")
+    public BaseResponse<Integer> batchDeleteMembers(@RequestBody DeleteDTO memberDeleteDTO) {
+        return ResultUtils.success(memberService.deleteMember(memberDeleteDTO));
     }
 
 }
