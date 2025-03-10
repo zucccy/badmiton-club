@@ -28,7 +28,7 @@ CREATE TABLE member
     phone            VARCHAR(32) COMMENT '手机号码',
     nation           VARCHAR(32) COMMENT '民族',
     origin_address   VARCHAR(256) COMMENT '籍贯',
-    home_address     VARCHAR(512)  NOT NULL COMMENT '家庭住址',
+    home_address     VARCHAR(512) COMMENT '家庭住址',
     work_unit        VARCHAR(512) COMMENT '工作单位',
     occupation       VARCHAR(64) COMMENT '职业',
     political_party  VARCHAR(64) COMMENT '党派',

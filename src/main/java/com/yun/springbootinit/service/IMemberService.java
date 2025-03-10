@@ -40,7 +40,7 @@ public interface IMemberService extends IService<Member> {
      * @param member
      * @return
      */
-    MemberVO getMemberVO(Member member);
+    MemberVO getMemberVO(Member member) throws Exception;
 
     /**
      * 根据筛选条件导出会员excel表

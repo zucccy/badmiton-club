@@ -14,7 +14,14 @@ public class ConfigManage {
     @Value("${app.default-password}")
     private String defaultPassword;
 
+    @Value("${app.aes.secret-key}")
+    private String secretKey;
+
     public String getDefaultPassword() {
         return defaultPassword;
+    }
+
+    public String getSecretKey() {
+        return secretKey;
     }
 }

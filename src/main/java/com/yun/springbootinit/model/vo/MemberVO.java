@@ -91,6 +91,9 @@ public class MemberVO {
     // 当前组别，0表示丙，1表示乙，2表示甲
     private String currentLevel;
 
+    // 身份证号
+    private String idNumber;
+
     private LocalDateTime createTime;
 
     private LocalDateTime updateTime;

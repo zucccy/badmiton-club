@@ -113,6 +113,8 @@ public class MemberImportData {
     private String currentLevel;
 
     @JsonProperty(value = "id_number")
+    @NotBlank(message = "需要填写身份证号")
+    @Pattern(regexp = "^[1-9]\\d{5}(18|19|20)\\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\\d|3[01])\\d{3}[0-9Xx]$", message = "身份证号格式错误")
     @ExcelProperty(value = "身份证号")
     private String idNumber;
 

@@ -98,7 +98,7 @@ public interface CommonConstant {
 
         String TEMPLATE_CURRENT_LEVEL = ClubLevelEnum.B_LEVEL.getText();
 
-        String TEMPLATE_ID_NUMBER = "330327XXXXXX";
+        String TEMPLATE_ID_NUMBER = "330327199802062256";
 
         String TEMPLATE_BANK_ACCOUNT = "XXXXXX";
 

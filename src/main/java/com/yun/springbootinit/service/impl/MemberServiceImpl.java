@@ -20,6 +20,7 @@ import com.yun.springbootinit.model.vo.MemberVO;
 import com.yun.springbootinit.service.IClubService;
 import com.yun.springbootinit.service.IMemberService;
 import com.yun.springbootinit.service.IUserService;
+import com.yun.springbootinit.utils.AESUtils;
 import com.yun.springbootinit.utils.SqlUtils;
 import com.yun.springbootinit.utils.ValidatorUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -33,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ValidationException;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Period;
@@ -124,6 +126,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     public MemberVO getMemberVO(Member member) {
         MemberVO memberVO = new MemberVO();
         BeanUtils.copyProperties(member, memberVO);
+        try {
+            memberVO.setIdNumber(AESUtils.decrypt(member.getIdNumber()));
+        } catch (Exception e) {
+            LOGGER.error("message: {}", e.getMessage());
+        }
         if (Objects.requireNonNull(GenderEnum.getEnumByValue(member.getGender())).getText().equals(GenderEnum.MALE.getText())) {
             memberVO.setGender(CommonConstant.MALE);
         } else {
@@ -199,7 +206,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
         }
         // 字段校验
-        ValidatorUtils.validate(memberImportData);
+        try {
+            ValidatorUtils.validate(memberImportData);
+        } catch (ValidationException e) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, e.getMessage());
+        }
         if (checkPhoneExisted(memberImportData)) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "手机号已存在");
         }
@@ -337,6 +348,12 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         BeanUtils.copyProperties(memberImportData, member);
         // 处理出生日期
         member.setBirthDate(LocalDate.parse(memberImportData.getBirthDate()));
+        // 处理身份证号
+        try {
+            member.setIdNumber(AESUtils.encrypt(memberImportData.getIdNumber()));
+        } catch (Exception e) {
+            LOGGER.error("message: {}", e.getMessage());
+        }
         handleUserAndClub(memberImportData, member);
         handleEnum(memberImportData, member);
         return member;

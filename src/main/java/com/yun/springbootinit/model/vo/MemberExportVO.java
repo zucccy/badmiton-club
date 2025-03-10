@@ -87,4 +87,7 @@ public class MemberExportVO {
 
     @ExcelProperty(value = "组别（甲组/乙组/丙组）")
     private String currentLevel;
+
+    @ExcelProperty(value = "身份证号")
+    private String idNumber;
 }
