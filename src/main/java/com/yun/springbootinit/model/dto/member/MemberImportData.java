@@ -24,7 +24,7 @@ public class MemberImportData {
     @NotBlank(message = "需要填写姓名")
     private String name;
 
-    @ExcelProperty(value = "性别（男/女）")
+    @ExcelProperty(value = "性别（男-女）")
     private String gender;
 
     @ExcelProperty(value = "出生日期")
@@ -63,23 +63,23 @@ public class MemberImportData {
     private String clubDuty;
 
     @JsonProperty(value = "is_civil_servant")
-    @ExcelProperty(value = "是否公务员（是/否）")
+    @ExcelProperty(value = "是否公务员（是-否）")
     private String isCivilServant;
 
     @JsonProperty(value = "is_cadre")
-    @ExcelProperty(value = "是否科局级及以上（是/否）")
+    @ExcelProperty(value = "是否科局级及以上（是-否）")
     private String isCadre;
 
     @JsonProperty(value = "is_veteran")
-    @ExcelProperty(value = "是否退役军人（是/否）")
+    @ExcelProperty(value = "是否退役军人（是-否）")
     private String isVeteran;
 
     @JsonProperty(value = "athlete_level")
-    @ExcelProperty(value = "专业运动员等级（国家级/省级/市级/县级）")
+    @ExcelProperty(value = "专业运动员等级（国家级-省级-市级-县级）")
     private String athleteLevel;
 
     @JsonProperty(value = "referee_level")
-    @ExcelProperty(value = "裁判员等级（国家级/一级/二级/三级）")
+    @ExcelProperty(value = "裁判员等级（国家级-一级-二级-三级）")
     private String refereeLevel;
 
     @JsonProperty(value = "honour_info")
@@ -109,7 +109,7 @@ public class MemberImportData {
     private String currentClubName;
 
     @JsonProperty(value = "current_level")
-    @ExcelProperty(value = "组别（甲组/乙组/丙组）")
+    @ExcelProperty(value = "组别（甲组-乙组-丙组）")
     private String currentLevel;
 
     @JsonProperty(value = "id_number")

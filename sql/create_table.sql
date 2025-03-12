@@ -52,6 +52,7 @@ CREATE TABLE member
     -- 归属信息
     residence_area   VARCHAR(32)   NOT NULL COMMENT '人员归属地（分龙港、苍南、平阳、温州市内、浙江省内、省外6个选项）',
     current_club_id  BIGINT COMMENT '当前所属俱乐部id',
+    current_club_name VARCHAR(256) COMMENT '当前所属俱乐部名',
     current_level    TINYINT       NOT NULL DEFAULT '0' COMMENT '当前组别，0表示丙，1表示乙，2表示甲',
 
     -- 隐私信息

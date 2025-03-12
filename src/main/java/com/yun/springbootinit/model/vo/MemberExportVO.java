@@ -19,7 +19,7 @@ public class MemberExportVO {
     @ExcelProperty(value = "姓名")
     private String name;
 
-    @ExcelProperty(value = "性别（男/女）")
+    @ExcelProperty(value = "性别（男-女）")
     private String gender;
 
     @ExcelProperty(value = "年龄")
@@ -49,22 +49,22 @@ public class MemberExportVO {
     @ExcelProperty(value = "俱乐部职务")
     private String clubDuty;
 
-    @ExcelProperty(value = "是否公务员（是/否）")
+    @ExcelProperty(value = "是否公务员（是-否）")
     @NotNull(message = "需要填写是否公务员")
     private String isCivilServant;
 
-    @ExcelProperty(value = "是否科局级及以上（是/否）")
+    @ExcelProperty(value = "是否科局级及以上（是-否）")
     @NotNull(message = "需要填写是否科局级及以上")
     private String isCadre;
 
-    @ExcelProperty(value = "是否退役军人（是/否）")
+    @ExcelProperty(value = "是否退役军人（是-否）")
     @NotNull(message = "需要填写是否退役军人")
     private String isVeteran;
 
-    @ExcelProperty(value = "专业运动员等级（国家级/省级/市级/县级）")
+    @ExcelProperty(value = "专业运动员等级（国家级-省级-市级-县级）")
     private String athleteLevel;
 
-    @ExcelProperty(value = "裁判员等级（国家级/一级/二级/三级）")
+    @ExcelProperty(value = "裁判员等级（国家级-一级-二级-三级）")
     private String refereeLevel;
 
     @ExcelProperty(value = "荣誉信息")
@@ -85,7 +85,7 @@ public class MemberExportVO {
     @ExcelProperty(value = "当前所属俱乐部名")
     private String currentClubName;
 
-    @ExcelProperty(value = "组别（甲组/乙组/丙组）")
+    @ExcelProperty(value = "组别（甲组-乙组-丙组）")
     private String currentLevel;
 
     @ExcelProperty(value = "身份证号")

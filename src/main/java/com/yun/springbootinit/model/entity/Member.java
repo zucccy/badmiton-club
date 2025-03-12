@@ -126,6 +126,10 @@ public class Member implements Serializable {
     @TableField("current_club_id")
     private Long currentClubId;
 
+    @ApiModelProperty(value = "当前所属俱乐部名")
+    @TableField("current_club_name")
+    private String currentClubName;
+
     @ApiModelProperty(value = "当前组别，0表示丙，1表示乙，2表示甲")
     @TableField("current_level")
     private Integer currentLevel;

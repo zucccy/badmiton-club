@@ -84,6 +84,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         Integer endAge = memberQueryRequest.getEndAge();
         Date getDateBeforeStartAge = getDateBeforeAge(startAge, CommonConstant.START);
         Date getDateBeforeEndAge = getDateBeforeAge(endAge, CommonConstant.END);
+        String phone = memberQueryRequest.getPhone();
         Boolean isCivilServant = memberQueryRequest.getIsCivilServant();
         Boolean isCadre = memberQueryRequest.getIsCadre();
         Boolean isVeteran = memberQueryRequest.getIsVeteran();
@@ -102,6 +103,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         // 如果要找到比endAge小的，则出生日期要大于getDateBeforeEndAge
         queryWrapper.le(startAge != null && endAge != null, "birth_date", getDateBeforeStartAge);
         queryWrapper.ge(startAge != null && endAge != null, "birth_date", getDateBeforeEndAge);
+        queryWrapper.like(StringUtils.isNotBlank(phone), "phone", phone);
         queryWrapper.eq(isCivilServant != null, "is_civil_servant", isCivilServant);
         queryWrapper.eq(isCadre != null, "is_veteran", isCadre);
         queryWrapper.eq(isVeteran != null, "is_cadre", isVeteran);
@@ -251,6 +253,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
                 throw new BusinessException(ErrorCode.SYSTEM_ERROR, "俱乐部不存在，请先添加俱乐部或选择已存在的俱乐部");
             }
             member.setCurrentClubId(club.getId());
+            member.setCurrentClubName(club.getClubName());
         }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("account", memberImportData.getPhone());

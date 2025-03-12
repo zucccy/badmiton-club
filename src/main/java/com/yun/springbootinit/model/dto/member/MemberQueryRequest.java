@@ -28,6 +28,8 @@ public class MemberQueryRequest extends PageRequest implements Serializable {
 
     private String gender;
 
+    private String phone;
+
     private Integer startAge;
 
     private Integer endAge;

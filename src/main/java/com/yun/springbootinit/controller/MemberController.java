@@ -63,6 +63,7 @@ public class MemberController {
                                                    @RequestParam(name = "residence_area",required = false) String residenceArea,
                                                    @RequestParam(name = "current_club_name",required = false) String currentClubNmae,
                                                    @RequestParam(name = "current_level",required = false) Integer currentLevel,
+                                                   @RequestParam(name = "phone",required = false) String phone,
                                                    @RequestParam(defaultValue = "1") Long current,
                                                    @RequestParam(defaultValue = "10") Long pageSize,
                                                    @RequestParam(required = false) String sort
@@ -71,6 +72,7 @@ public class MemberController {
         memberQueryRequest.setId(id);
         memberQueryRequest.setName(name);
         memberQueryRequest.setGender(gender);
+        memberQueryRequest.setPhone(phone);
         memberQueryRequest.setStartAge(startAge);
         memberQueryRequest.setEndAge(endAge);
         memberQueryRequest.setIsCivilServant(isCivilServant);

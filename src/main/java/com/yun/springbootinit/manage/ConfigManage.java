@@ -11,17 +11,26 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ConfigManage {
+
+    private static String defaultPassword;
+
+    private static String secretKey;
+
     @Value("${app.default-password}")
-    private String defaultPassword;
+    public void setDefaultPassword(String value) {
+        ConfigManage.defaultPassword = value;
+    }
 
     @Value("${app.aes.secret-key}")
-    private String secretKey;
+    public void setSecretKey(String value) {
+        ConfigManage.secretKey = value;
+    }
 
-    public String getDefaultPassword() {
+    public static String getDefaultPassword() {
         return defaultPassword;
     }
 
-    public String getSecretKey() {
+    public static String getSecretKey() {
         return secretKey;
     }
 }
