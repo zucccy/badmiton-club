@@ -14,6 +14,7 @@ import com.yun.springbootinit.manage.MemberImportManage;
 import com.yun.springbootinit.model.dto.DeleteDTO;
 import com.yun.springbootinit.model.dto.member.MemberImportData;
 import com.yun.springbootinit.model.dto.member.MemberQueryRequest;
+import com.yun.springbootinit.model.dto.member.MemberUpdateRequest;
 import com.yun.springbootinit.model.entity.Member;
 import com.yun.springbootinit.model.vo.ImportResultVO;
 import com.yun.springbootinit.model.vo.MemberVO;
@@ -55,15 +56,15 @@ public class MemberController {
                                                    @RequestParam(required = false) String gender,
                                                    @RequestParam(name = "start_age", required = false) Integer startAge,
                                                    @RequestParam(name = "end_age", required = false) Integer endAge,
-                                                   @RequestParam(name = "is_civil_servant",required = false) Boolean isCivilServant,
+                                                   @RequestParam(name = "is_civil_servant", required = false) Boolean isCivilServant,
                                                    @RequestParam(name = "is_cadre", required = false) Boolean isCadre,
-                                                   @RequestParam(name = "is_veteran",required = false) Boolean isVeteran,
-                                                   @RequestParam(name = "athlete_level",required = false) String athleteLevel,
-                                                   @RequestParam(name = "referee_level",required = false) String refereeLevel,
-                                                   @RequestParam(name = "residence_area",required = false) String residenceArea,
-                                                   @RequestParam(name = "current_club_name",required = false) String currentClubNmae,
-                                                   @RequestParam(name = "current_level",required = false) Integer currentLevel,
-                                                   @RequestParam(name = "phone",required = false) String phone,
+                                                   @RequestParam(name = "is_veteran", required = false) Boolean isVeteran,
+                                                   @RequestParam(name = "athlete_level", required = false) String athleteLevel,
+                                                   @RequestParam(name = "referee_level", required = false) String refereeLevel,
+                                                   @RequestParam(name = "residence_area", required = false) String residenceArea,
+                                                   @RequestParam(name = "current_club_name", required = false) String currentClubNmae,
+                                                   @RequestParam(name = "current_level", required = false) Integer currentLevel,
+                                                   @RequestParam(name = "phone", required = false) String phone,
                                                    @RequestParam(defaultValue = "1") Long current,
                                                    @RequestParam(defaultValue = "10") Long pageSize,
                                                    @RequestParam(required = false) String sort
@@ -137,6 +138,11 @@ public class MemberController {
     @DeleteMapping("/delete")
     public BaseResponse<Integer> batchDeleteMembers(@RequestBody DeleteDTO memberDeleteDTO) {
         return ResultUtils.success(memberService.deleteMember(memberDeleteDTO));
+    }
+
+    @PutMapping("/update/{id}")
+    public BaseResponse<Long> updateMember(@PathVariable("id") Long id, @RequestBody MemberUpdateRequest memberUpdateRequest) {
+        return ResultUtils.success(memberService.updateMember(id, memberUpdateRequest));
     }
 
 }

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.yun.springbootinit.model.dto.DeleteDTO;
 import com.yun.springbootinit.model.dto.member.MemberImportData;
 import com.yun.springbootinit.model.dto.member.MemberQueryRequest;
+import com.yun.springbootinit.model.dto.member.MemberUpdateRequest;
 import com.yun.springbootinit.model.entity.Member;
 import com.yun.springbootinit.model.vo.MemberVO;
 
@@ -67,4 +68,12 @@ public interface IMemberService extends IService<Member> {
      * @return
      */
     Integer deleteMember(DeleteDTO memberDeleteDTO);
+
+    /**
+     * 根据id修改会员信息
+     * @param id
+     * @param memberUpdateRequest
+     * @return
+     */
+    Long updateMember(Long id, MemberUpdateRequest memberUpdateRequest);
 }

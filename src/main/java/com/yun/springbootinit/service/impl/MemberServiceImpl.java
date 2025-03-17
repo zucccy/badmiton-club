@@ -1,4 +1,5 @@
 package com.yun.springbootinit.service.impl;
+import java.time.LocalDateTime;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.excel.EasyExcel;
@@ -11,6 +12,7 @@ import com.yun.springbootinit.mapper.MemberMapper;
 import com.yun.springbootinit.model.dto.DeleteDTO;
 import com.yun.springbootinit.model.dto.member.MemberImportData;
 import com.yun.springbootinit.model.dto.member.MemberQueryRequest;
+import com.yun.springbootinit.model.dto.member.MemberUpdateRequest;
 import com.yun.springbootinit.model.entity.Club;
 import com.yun.springbootinit.model.entity.Member;
 import com.yun.springbootinit.model.entity.User;
@@ -22,6 +24,7 @@ import com.yun.springbootinit.service.IMemberService;
 import com.yun.springbootinit.service.IUserService;
 import com.yun.springbootinit.utils.AESUtils;
 import com.yun.springbootinit.utils.SqlUtils;
+import com.yun.springbootinit.utils.UserContextHolder;
 import com.yun.springbootinit.utils.ValidatorUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -237,10 +240,48 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
         return memberDeleteDTO.getIdList().size();
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long updateMember(Long id, MemberUpdateRequest memberUpdateRequest) {
+        if (Objects.isNull(id) || Objects.isNull(memberUpdateRequest)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数错误");
+        }
+        // 字段校验
+        try {
+            ValidatorUtils.validate(memberUpdateRequest);
+        } catch (ValidationException e) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, e.getMessage());
+        }
+        Member member = this.getById(id);
+        if (Objects.isNull(member)) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "会员不存在");
+        }
+        if (checkUpdatePhoneExisted(id, memberUpdateRequest)) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "手机号已存在");
+        }
+        Member newMember = convertUpdateReq2Member(memberUpdateRequest);
+        newMember.setId(member.getId());
+        newMember.setUpdateTime(LocalDateTime.now());
+        this.updateById(newMember);
+        return member.getId();
+    }
+
+    private Member convertUpdateReq2Member(MemberUpdateRequest memberUpdateRequest) {
+        return importDataToEntity(memberUpdateRequest);
+    }
+
     public boolean checkPhoneExisted(MemberImportData memberImportData) {
         // 手机号唯一性校验
         QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("phone", memberImportData.getPhone());
+        return this.count(queryWrapper) > 0;
+    }
+
+    public boolean checkUpdatePhoneExisted(Long id, MemberUpdateRequest memberUpdateRequest) {
+        // 手机号唯一性校验
+        QueryWrapper<Member> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("phone", memberUpdateRequest.getPhone());
+        queryWrapper.ne("id", id);
         return this.count(queryWrapper) > 0;
     }
 
