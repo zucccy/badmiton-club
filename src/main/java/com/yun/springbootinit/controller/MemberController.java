@@ -27,9 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * <p>
@@ -95,12 +93,20 @@ public class MemberController {
                 memberQueryRequest.setSortOrder(entry.getValue() == null ? CommonConstant.SORT_ORDER_ASC : (String) entry.getValue());
             });
         }
-        // 限制爬虫
-        ThrowUtils.throwIf(pageSize > 50, ErrorCode.PARAMS_ERROR);
-        Page<Member> memberPage = memberService.page(new Page<>(current, pageSize),
-                memberService.getQueryWrapper(memberQueryRequest));
-        Page<MemberVO> memberVOPage = new Page<>(current, pageSize, memberPage.getTotal());
-        List<MemberVO> memberVOList = memberService.listMemberVO(memberPage.getRecords());
+        Page<MemberVO> memberVOPage = new Page<>();
+        List<MemberVO> memberVOList;
+        // 如果pageSize为null，则是导出场景，不分页
+        if (pageSize < 0) {
+            List<Member> memberList = memberService.list(memberService.getQueryWrapper(memberQueryRequest));
+            memberVOList = memberService.listMemberVO(memberList);
+        } else {
+            // 限制爬虫
+            ThrowUtils.throwIf(pageSize > 50, ErrorCode.PARAMS_ERROR);
+            Page<Member> memberPage = memberService.page(new Page<>(current, pageSize),
+                    memberService.getQueryWrapper(memberQueryRequest));
+            memberVOPage.setCurrent(current).setSize(pageSize).setTotal(memberPage.getTotal());
+            memberVOList = memberService.listMemberVO(memberPage.getRecords());
+        }
         memberVOPage.setRecords(memberVOList);
         return ResultUtils.success(memberVOPage);
     }
