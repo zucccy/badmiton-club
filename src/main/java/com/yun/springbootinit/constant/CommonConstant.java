@@ -50,6 +50,8 @@ public interface CommonConstant {
 
     String BRITH_DATE = "birth_date";
 
+    String DATE_FORMAT = "yyyy-MM-dd";
+
     interface templateConstant {
 
         String TEMPLATE_NAME = "陈阿三";

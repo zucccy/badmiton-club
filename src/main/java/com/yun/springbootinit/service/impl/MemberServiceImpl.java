@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -131,6 +132,8 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
     public MemberVO getMemberVO(Member member) {
         MemberVO memberVO = new MemberVO();
         BeanUtils.copyProperties(member, memberVO);
+        // deal birthDate
+        memberVO.setBirthDate(getBrithDateStr(member.getBirthDate()));
         try {
             memberVO.setIdNumber(AESUtils.decrypt(member.getIdNumber()));
         } catch (Exception e) {
@@ -488,5 +491,13 @@ public class MemberServiceImpl extends ServiceImpl<MemberMapper, Member> impleme
             age--;
         }
         return age;
+    }
+
+    private static String getBrithDateStr(LocalDate birthDate) {
+        if (Objects.isNull(birthDate)) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "出生日期不存在");
+        }
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(CommonConstant.DATE_FORMAT);
+        return birthDate.format(dateTimeFormatter);
     }
 }

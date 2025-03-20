@@ -28,6 +28,9 @@ public class MemberVO {
     // 年龄
     private Integer age;
 
+    // 出生日期
+    private String birthDate;
+
     // 手机号码
     private String phone;
 
